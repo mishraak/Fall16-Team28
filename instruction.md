@@ -7,10 +7,15 @@ Scatterplot makes this possible, and we are trying to integrate this idea with b
 ## Getting Started
 
 Download the provided files on your own machine, you need to copy these to corresponding locations once pre req softwares are installed.
+
 logstash - /etc/logstash/logstash.conf
+
 elasticsearch - /etc/elasticsearch/elasticsearch.yml
+
 kibana - /usr/share/nginx/kibana/config.js
+
 nginx - /etc/nginx/nginx.conf
+
 logstash run script - /opt/logstash/bin
 
 
