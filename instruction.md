@@ -22,20 +22,30 @@ Please refer to 'https://www.digitalocean.com/community/tutorials/how-to-use-log
 to install ELK stack with Nginx on Fedora 24 release.
 
 You may go with different versions than these, but it may involve minor syntax differences for that particular version in config files.
+
 1. Please replace corresponding conf files with provided files.
+
 2. Create a directory called *scatterplot* in the root path of Nginx as specified in our Nginx conf file.
+
 3. Copy paste index.html in that directory.
+
 4. Verify all steps again.
+
 5. Restart Elasticsearch, logstash and Nginx service. (Newer version has Kibana as a separate service running as well as inbuilt web server.)
+
 6. This shouldn't throw an error, otherwise you may have to troubleshoot the errors.
-7. Now feed the logs to ES by using logstash, and make sure to enter correct grok filter for your type of logs. I have included grok filter 
-   for IIS logs, you may change it to your customs logs, but verify it on *http://grokdebug.herokuapp.com/*
+
+7. Now feed the logs to ES by using logstash, and make sure to enter correct grok filter for your type of logs. I have included grok filter for IIS logs, you may change it to your customs logs, but verify it on *http://grokdebug.herokuapp.com/*
+
 8. Now place your log file at location specified in logstash, and restart logstash service. CHheck if you see indexed logs on 
    '127.0.0.1:9200/_search?'
+
 9. Update the fields you want to retrieve/plot in the scatterplot, and hit http://127.0.0.1:9200/scatterplot, and check.
+
 10. You should be able to see a scatterplot now.
 
 Acknowledgements:
 
 www.digitalocean.com
+
 ELK official documentation
