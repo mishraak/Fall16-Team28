@@ -2,36 +2,110 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Scatterplots</title>
-  <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
-  <!--link rel="stylesheet" href="/resources/demos/style.css"-->
+  <title>Scatterplots</title> 
+  <!--link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/base/jquery-ui.css">
+  <link rel="stylesheet" href="/resources/demos/style.css"-->
   <script src="https://code.jquery.com/jquery-1.12.4.js"></script>
   <script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
   <script src="https://code.highcharts.com/highcharts.js"></script>
   <script src="https://code.highcharts.com/modules/exporting.js"></script>
-  <script src= "https://cdn.jsdelivr.net/momentjs/2.16.0/moment-with-locales.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/2.16.0/moment-with-locales.min.js"></script>
   
   <script>
 
-  $( document ).ready(function() {
-    
+    var url;
     var chartData = [];
 
     Highcharts.setOptions({
         global: {
-          useUTC: true
-      }
+            useUTC: true
+        }
     });
 
-    $.ajax({
-          type             : "GET",
-          url              : "http://127.0.0.1:9200/kibana-int/_search?fields=log_timestamp,timetaken",
-          dataType         : "json",
-          success          : function(data) {
-                                parseData(data);
-                             }
-    }); 
+
+    $( document ).ready(function() {
+
+        $("#datepickerFrom").datepicker({dateFormat: "mm-dd-yy"});
+        $("#datepickerTo").datepicker({dateFormat: "mm-dd-yy"});
+
+        var today = new Date();
+        var last_week = today.setDate(today.getDate() - 7);
+
+        $("#datepickerFrom").datepicker( 'setDate', today );
+        $("#datepickerTo").datepicker( 'setDate', last_week );
+
+        $('select option[value="*"]').attr("selected",true);
+
+        $("#dropdown_change").change(function(){
+              //console.log("New URL selected : " + document.getElementById("dropdown_change").value);
+              url = document.getElementById("dropdown_change").value;
+        });
+
+        $("#btnSubmit").click(function(){
+            var dateFrom = $("#datepickerFrom").datepicker('getDate');
+            var fromDate = dateFrom.getTime();
+            //console.log("dateFrom :" + dateFrom);
+
+
+            var dateTo = $("#datepickerTo").datepicker('getDate');
+            var toDate = dateTo.getTime();
+            //console.log("dateTo :" + dateTo);
+
+            url = document.getElementById("dropdown_change").value;
+            //console.log(url);
+
+            if (url == "*") {
+              //console.log("url is *");
+            }
+            else
+            {
+              url = "/" + url;
+              //console.log("url is " +url);
+            }
+            requestJSON = { 
+                              "query" : 
+                                {
+                                  "bool" : {
+                                        "should": [
+                                            {
+                                                "query_string": { 
+                                                                  "query": "uriStem : " + url
+                                                                  //"query" : "method:POST"         
+                                                }
+                                            } 
+                                        ]
+                                      }
+                                }
+                          }  
+
+
+            
+          console.log(JSON.stringify(requestJSON));
+
+          $.ajax({
+              type             : 'POST',
+              url              : 'http://127.0.0.1:9200/cmpe272/_search?fields=log_timestamp,timetaken',
+              dataType         : 'json',
+              data             : JSON.stringify(requestJSON),
+              success          : function(data) {
+                                  console.log(data);
+                                    parseData(data);
+                                 },
+              error            : function(e) { 
+                                  console.log(e); 
+                                },
+              responseJSON     : function(responseText) {
+                                  console.log(responseText);
+                                }
+    
+          });                 
+
+            
+         }); 
+        
+    });
+
+
 
     function parseData(data) {
         $.each(data.hits.hits, function(index,item) {
@@ -54,9 +128,6 @@
           //console.log(chartData);
             ScatterplotData(chartData);
       };
-});
-
-
 
 function ScatterplotData(data) {    
       $(function () {
@@ -87,10 +158,10 @@ function ScatterplotData(data) {
             },
             tooltip: {
                 formatter: function() {
-                    //console.log(this);
+                    //console.log(this.x + " " + this.y);
                     return  '<b>' + this.series.name +'</b><br/>' +
-                        Highcharts.dateFormat('%e - %b - %Y',
-                                              new Date(this.x))
+                        Highcharts.dateFormat('%e - %b - %Y', new Date(this.x)) 
+                        //this.x
                     + ' date, ' + this.y + ' (ms)';
                 }
             },
@@ -126,5 +197,23 @@ function ScatterplotData(data) {
 </head>
 
 <body>
+  <p>
+    From: <input type="datetime" id="datepickerFrom" autofocus>
+    To: <input type="datetime" id="datepickerTo">
+    
+    Select a URL:
+    <select id="dropdown_change">
+      <option value="*">all</option>
+      <option value="/index.htm<">index</option>
+      <option value="/blank.htm">blank</option>
+      <option value="/test.htm">test</option>
+      <option value="/Default.htm">default</option>
+    </select>
+
+
+
+    <input type="submit" value="Submit" id="btnSubmit">
+  </p>
+ 
    <div id="container" style="min-width: 310px; height: 400px; max-width: 800px; margin: 0 auto"></div>
 </body>
