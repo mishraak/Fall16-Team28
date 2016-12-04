@@ -84,8 +84,9 @@
 
           $.ajax({
               type             : 'POST',
-              url              : 'http://127.0.0.1:9200/cmpe272/_search?fields=log_timestamp,timetaken',
-              dataType         : 'json',
+              //url              : 'http://127.0.0.1:9200/cmpe272/_search?_source=log_timestamp,timetaken',
+              url              : 'http://127.0.0.1:9200/_search?_source=log_timestamp,timetaken&pretty',
+              dataType         : 'jsonp',
               data             : JSON.stringify(requestJSON),
               success          : function(data) {
                                   console.log(data);
@@ -111,7 +112,7 @@
         $.each(data.hits.hits, function(index,item) {
             var chartDataSinglePoint = [];
 
-            var log_date = new Date(item.fields.log_timestamp)
+            var log_date = new Date(item._source.log_timestamp)
             var d = log_date.getDate();
             var m = log_date.getMonth();
             var y = log_date.getFullYear();
@@ -119,7 +120,7 @@
             var mn = log_date.getMinutes();
             var s = log_date.getSeconds();
             var dt = Date.UTC(y,m,d,h,mn,s);
-            var timetaken = Number(item.fields.timetaken[0]);
+            var timetaken = Number(item._source.timetaken[0]);
 
             chartDataSinglePoint.push(dt, timetaken);
             //console.log(chartDataSinglePoint);
@@ -207,7 +208,7 @@ function ScatterplotData(data) {
       <option value="/index.htm<">index</option>
       <option value="/blank.htm">blank</option>
       <option value="/test.htm">test</option>
-      <option value="/Default.htm">default</option>
+      <option value="/default.htm">default</option>
     </select>
 
 
