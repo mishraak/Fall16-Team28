@@ -1,0 +1,110 @@
+<html>
+	<head>
+		<script src="https://code.jquery.com/jquery-1.12.4.js"></script>
+	  	<script src="https://code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+		<script src="https://code.highcharts.com/highcharts.js"></script>
+		<script src="https://code.highcharts.com/modules/exporting.js"></script>
+	</head>
+
+	<body>
+		
+	<script>
+	
+	setTimeout(function(){
+   		window.location.reload(1);
+	}, 5000);
+
+
+		var arr = [];
+	    $(document).ready(function () {
+		    function retrieveData() {
+		    	var arram =[];
+	    	$.ajax({
+			    type             : 'POST',
+			    async			 : false,
+			    url              : 'http://127.0.0.1:9200/_search?_source=bytesSent,log_timestamp&size=50&sort=log_timestamp:desc&pretty',
+			    data             : {},
+			    cache            : false,                
+			    success          : function(data) {	
+										$.each(data.hits.hits, function(index,item) {			
+											arram.push({
+													x : parseFloat(new Date(Date.parse(item._source.log_timestamp.toString())).getTime()), 
+													y : parseFloat(item._source.bytesSent)
+											});
+										});														
+									}
+			});
+			return arram;
+		    };
+
+		    function getData() {
+
+		    		var b  = retrieveData();		
+					return b;	
+			}; 			    
+	    
+	        Highcharts.chart('container', {
+	            chart: {
+	                type: 'spline',
+	                animation: Highcharts.svg, 
+	                marginRight: 10,
+	                events: {
+	                    load: function () {
+	                        var series = this.series[0];  
+	                        console.log(series);                      
+	                        setInterval(function () {
+	                            //var x = (new Date()).getTime(), y = Math.random()*100;
+	                            var l = series.xData, m = series.yData;
+	                            console.log("l " + l + " m " + m);
+	                            series.addPoint([l, m], true, true);
+	                        }, 5000);
+	                    }	
+	                }
+	            },
+	            title: {
+	                text: 'Time taken to load page'
+	            },
+	            xAxis: {
+	                type: 'datetime',
+	                tickPixelInterval: 150
+	            },
+	            yAxis: {
+	                title: {
+	                    text: 'Value'
+	                },
+	                plotLines: [{
+	                    value: 0,
+	                    width: 1,
+	                    color: '#808080'
+	                }]
+	            },
+	            tooltip: {
+	                formatter: function () {
+	                    return '<b>' + this.series.name + '</b><br/>' +
+	                        Highcharts.dateFormat('%Y-%m-%d %H:%M:%S', this.x) + '<br/>' +
+	                        Highcharts.numberFormat(this.y, 2);
+	                }
+	            },
+	            legend: {
+	                enabled: false
+	            },
+	            exporting: {
+	                enabled: false
+	            },
+	            series: [{
+	                name: 'ELK Data',
+				    data : (function () {
+				    	var x;
+				    	 //setInterval(function () {
+				    		 x = getData();
+				    	//}, 1000);				    		
+							return x;
+				    }())
+	            }]
+	        });
+
+		});
+
+	</script>
+	<div id="container" style="min-width: 310px; height: 400px; margin: 0 auto"></div>
+</body>
