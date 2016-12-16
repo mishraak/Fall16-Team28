@@ -68,8 +68,22 @@ just download docker-elk folder somewhere on your machine and run below command 
 ```
 docker-compose run --build 
 ```
+One known issue that may come up while starting up elasticsearch containers is that, it may throw an error saying minimum acceptable value for vm.max_map_count should be 262144 for ES to start up. This is a highly recommended setting for prod system to avoid trouble later. So under using root access, run below command :
 
-This should automatically fetch and build required images and also start running docker containers.
+```
+su
+```
+Now enter root password on prompt, and ten run
+
+```
+echo 262144 > /proc/sys/vm/max_map_count
+```
+Now run 
+```
+docker-compose run --build
+```
+
+again and this should automatically fetch and build required images and also start running docker containers.
 
 Your app will start listening on localhost:3000/elk_dashboard, as you can check in the logs.
 Check the browser. Username and pwd is "admin" and "admin".
