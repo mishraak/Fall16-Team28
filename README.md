@@ -4,21 +4,32 @@ We are making scatterplot possible in ELK now. Traditionally ELK stack makes us 
 
 ## Getting Started
 
-Install docker and docker-compose v(1.9+) on your linux machine. You also need java installed to run the dummy log generator utility which is written in Java. You also need to have node installed on your machine.
+Install below on your linux machine :
+
+* jdk 6+
+* [docker client (1.12+)](https://docs.docker.com/engine/installation/linux/fedora/) 
+* [docker server (1.12+)](https://docs.docker.com/engine/installation/linux/fedora/)
+* [docker-compose v(1.9+)](https://docs.docker.com/compose/install/) 
 
 
-Create a folder called 'app' in your host inside /var/log directory as java utility that creates dummy logs, dumps logs in
-/var/log/app/iis.log file. iis.log file is created if not already existing, so you may skip creating such a file as the beginning.
 
+**Note** 
 
-You have 2 versions of java code in log-generator file. 
-Random one generates log with timestamp randomly, within years 2012 to 2015. This is so you have some logs in the past so you can check using date filter in the UI.
+We have created a dummy log generator to test our code, as we need real-time logs as well as logs from the past dates. In prod system, filebeat will be monitoring actual log files instead of the ones created byour java utility here. so, change the mounted volume path to Logstash container and also the 'paths' in filebeat.yml which resides in docker-elk/filebeat/config directory.
 
-increasing one generates logs with a timestamp starting from current time and advancing every 3 seconds. This is to test real-time update functionality in monitoring graphs where latest 50/100 requests are loaded every few seconds.
+**Instructions**
 
-Now run random for some time, lets say 1 min, and stop so you have enough logs from the past years to filte. Now run java code from increasing folder so you have logs generator in realtime like in actual prod systems.
+Create a folder called 'app' in your host inside /var/log directory as java utility that creates and dumps dummy logs in
+/var/log/app/iis.log file. Also, the iis.log file is created if not already existing, and logs are appended to it everytime we run the java utility.
 
-use below commands to follow above instructions:
+You have 2 versions of the utility in log-generator directory - random and increasing. 
+
+"Random" one generates log with timestamp randomly, within years 2012 to 2015. This is so you have some logs in the past so you can test the date filter in the UI."Increasing" one generates logs with a timestamp starting from current time and advancing every 3 seconds. 
+
+First run "random" for some time, lets say 1 min, and stop so you have enough logs from the past years to filter up later. 
+Next, run "increasing" folder so you have logs generated in real-time similar to the real-life scenarios. This is to test real-time update functionality in monitoring graphs where latest 50/100 requests are loaded every few seconds.
+
+use below commands from the mentioned directories (random/increasing) to run java utilities:
 
 Afer downloading log-generator folder somewhere on your machine,  compile the java code using below command.
 
@@ -32,25 +43,20 @@ This will create a .class file in the same folder, which you can run using
 sudo java ProjectLogs
 ```
 
-Note that you need sudo command because you dont have permission as a normal user to write in /var/log.
+**Note**
 
+You need sudo command because you dont have permission as a normal user to write in /var/log.
+If you do not have sudo access, then change location of file generated to ~/iis.log in java code, mounted volume in docker-compose for logstash part and also in filebeat paths at the beginning.
 
-
-If you don't have sudo access, change the path of log file in ProjectLogs.java as well as filebeat.yml in 
-docker-elk/filebeat/config folder.
-
-Simply download docker-elk folder somewhere on your machine and run command 
+Finally, simply download docker-elk folder somewhere on your machine and run command 
 
 ```
 docker-compose run --build 
 ```
 
 from that folder. This command will automatically fetch required images and run docker containers.
-
-
-fnow your app will start listening on localhost:3000/elk_dashboard.
-
-Now check the browser. Username and pwd is "admin" and "admin".
+Your app will start listening on localhost:3000/elk_dashboard, as you can check in the logs.
+Check the browser. Username and pwd is "admin" and "admin".
 
 Enjoy!!!
 
