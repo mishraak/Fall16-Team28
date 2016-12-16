@@ -4,7 +4,7 @@
 <img src="http://www.itzgeek.com/wp-content/uploads/2016/09/Run-ELK-stack-on-Docker-Container.png" width="50%" align="centre">
  
 
-# Why we may not want to go to cloud with this app?
+# Why we may not want to 'go cloud' with this app?
 As users of this app, we may not deploy this app to cloud for few reasons :
 
 1. This app is not going to generate any revenue for the company but only serves as a tool for your web developers. So one may not want to spend financial resources on deploying this to cloud environment. Also as this is not a client-facing website, you also do not need to think about latency, etc fro different geographical location perspective.
