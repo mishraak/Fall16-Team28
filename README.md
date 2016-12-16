@@ -1,5 +1,6 @@
  [![license](https://img.shields.io/github/license/mashape/apistatus.svg)](https://github.com/SJSU272Lab/Fall16-Team28/blob/master/LICENSE.md)
  [![GitHub issues](https://img.shields.io/badge/issues-0%20open-green.svg)](https://github.com/SJSU272Lab/ELKplot/issues?q=is%3Aopen+is%3Aissue) 
+ 
 <img src="http://www.itzgeek.com/wp-content/uploads/2016/09/Run-ELK-stack-on-Docker-Container.png" width="50%" align="centre">
  
 
