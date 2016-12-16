@@ -4,7 +4,7 @@
 <img src="http://www.itzgeek.com/wp-content/uploads/2016/09/Run-ELK-stack-on-Docker-Container.png" width="50%" align="centre">
  
 
-# Note
+# Why we may not want to go to cloud with this app?
 As users of this app, we may not deploy this app to cloud for few reasons :
 
 1. This app is not going to generate any revenue for the company but only serves as a tool for your web developers. So one may not want to spend financial resources on deploying this to cloud environment. Also as this is not a client-facing website, you also do not need to think about latency, etc fro different geographical location perspective.
@@ -33,20 +33,18 @@ Install below on your linux machine :
 
 
 
-**Note** 
+** Setting up this app on your linux machine**
 
 We have created a dummy log generator to test our code, as we need real-time logs as well as logs from the past dates. In prod system, filebeat will be monitoring actual log files instead of the ones created byour java utility here. so, change the mounted volume path to Logstash container and also the 'paths' in filebeat.yml which resides in docker-elk/filebeat/config directory.
-
-**Instructions**
 
 Two simple steps to get the app running :
 1. Run "random" & "increasing" java utilities to generated logs.
 2. simply run docker-compose from "docker-elk" directiry.
 
-For first part,  
+For the first part,  
 
-You need sudo access because normal user dont have permission as a normal user to write in /var/log in Linux.
-If you do not have sudo access, then change location of file generated to ~/iis.log in java code, mounted volume in docker-compose for logstash part and also in filebeat paths at the beginning.
+You need sudo access because normally users don't have permission as a normal user to write in /var/log in Linux.
+(If you do not have sudo access, then change location of file generated to ~/iis.log in java code, mounted volume in docker-compose for logstash part and also in filebeat paths at the beginning.)
 
 Create a folder called 'app' in your host inside /var/log/ directory as java utility that creates and dumps dummy logs in
 /var/log/app/iis.log file. Also, the iis.log file is created if not already existing, and logs are appended to it everytime we run the java utility.
@@ -75,5 +73,3 @@ Your app will start listening on localhost:3000/elk_dashboard, as you can check 
 Check the browser. Username and pwd is "admin" and "admin".
 
 Enjoy!!!
-
-
