@@ -1,0 +1,271 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>ELK Scatterplots</title>
+
+<script src="http://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular.min.js"></script>
+<script src="//cdnjs.cloudflare.com/ajax/libs/angular-ui-router/0.2.14/angular-ui-router.min.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-route.js"></script>
+<script src="//ajax.googleapis.com/ajax/libs/angularjs/1.3.0-beta.1/angular-cookies.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/angularjs/1.2.26/angular-resource.min.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+<script src="http://code.jquery.com/ui/1.9.2/jquery-ui.js"></script>
+
+
+<link rel='stylesheet' href='/stylesheets/style.css' />
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css">
+<link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap-theme.min.css">
+<script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.5/js/bootstrap.min.js"></script>
+
+
+
+  <script src="https://code.highcharts.com/highcharts.js"></script>
+  <script src="https://code.highcharts.com/modules/exporting.js"></script>
+  <script src="https://cdn.jsdelivr.net/momentjs/2.16.0/moment-with-locales.min.js"></script>
+
+<!-- Loading the AngularJS file from /public/angularJS folder -->
+<script src="angularjs/login.js"></script>
+
+<style>
+    #container{
+       margin: auto;
+       top: 60px; /* Header Height */
+       bottom: 20px; /* Footer Height */
+       width: 90%;
+       height: 80%;
+    }
+    .legend { list-style: none; }
+    .legend li { float: left; margin-right: 10px; }
+    .legend span { border: 1px solid #ccc; float: left; width: 12px; height: 12px; margin: 2px; }
+    /* your colors */
+    .legend .twohundred { background-color: rgba(22, 229, 29, .5); }
+    .legend .threehundred { background-color: rgba(239, 155,28 ,.5); }
+    .legend .fourhundred { background-color: rgba(49, 28, 239, .5); }
+    .legend .fourhundredfour { background-color: rgba(155, 28, 239, .5); }
+    .legend .fivehundred { background-color: rgba(239, 49, 28, .5); }
+    .legend .others { background-color: rgba(255,0,255,0.3); }
+  </style>
+
+
+ <script type="text/javascript">  
+ var chartData = [];
+    Highcharts.setOptions({
+        global: {
+            useUTC: true
+        }
+    });
+
+    $(document).ready(function() {
+    	console.log("Hey Call is here1");
+        $('select option[value="*"]').attr("selected",true);
+        $("#dropdown_change").change(function(){
+              //console.log("New URL selected : " + document.getElementById("dropdown_change").value);
+              response = document.getElementById("dropdown_change").value;
+        });
+
+        //btnSubmit function starts
+        $("#btnSubmit").click(function() {
+        	console.log("Hey Call is here2");
+            response = document.getElementById("dropdown_change").value;
+            //console.log(url);
+
+            requestJSON = {
+                            "query" :
+                              {
+                              "bool" : {
+                                    "should": [{
+                                        "query_string": {
+                                                "query": "response :" + response
+                                                //"query" : "method:POST"
+                                        }
+                                      }]
+                                  }
+                              }
+                          }
+
+            console.log(JSON.stringify(requestJSON));
+
+            //ajax call starts
+            $.ajax({
+                type             : 'POST',
+                url              : 'http://127.0.0.1:9200/cmpe272/_search?size=5000&_source=log_timestamp,timetaken,response,uriStem,method',
+                dataType         : 'json',
+                cache            : false,
+                data             : JSON.stringify(requestJSON),
+                success          : function(data) {
+                                    console.log(data);
+                                      parseData(data); //send data to parseData function to parse further
+                                   },
+                error            : function(e) {
+                                    console.log(e);  //log error on the console
+                                  },
+                responseJSON     : function(responseText) {
+                                    console.log(responseText);
+                                  }
+            });
+            //ajax call ends
+        });
+        //btnSubmit function starts
+    });
+
+
+    function parseData(data) {
+      //parsing data into multiple fields
+      $.each(data.hits.hits, function(index,item) {
+        var log_date, d, m, y, h, mn, s, dt, timetaken, method, url, colr, username;
+        var chartDataSinglePoint = {};
+        var otherfields =[];
+
+        //splitting date into multiple fields
+         log_date = new Date(item._source.log_timestamp)
+         d = log_date.getDate();
+         m = log_date.getMonth();
+         y = log_date.getFullYear();
+         h = log_date.getHours();
+         mn = log_date.getMinutes();
+         s = log_date.getSeconds();
+         dt = Date.UTC(y,m,d,h,mn,s);
+         timetaken = Number(item._source.timetaken[0]);
+
+         chartDataSinglePoint.x = dt;
+         chartDataSinglePoint.y = timetaken;
+
+         method = item._source.method; //for storing method type into json object
+         url = item._source.uriStem;   //for storing uri type into json object
+         response = item._source.response; //for storing response code type into json object
+         username = item._source.username;
+         //console.log("url :" + url);
+
+         otherfields.push(method);
+         otherfields.push(url);
+         otherfields.push(response);
+         otherfields.push(username);
+         chartDataSinglePoint.other=otherfields;
+
+         //console.log(otherfields);
+
+         if (response == 200)
+          colr = 'rgba(22, 229, 29, .5)';
+         else if (response == 300 )
+          colr = 'rgba(239, 155,28 ,.5)'
+         else if (response == 400 )
+          colr = 'rgba(49, 28, 239, .5)';
+         else if (response == 404)
+          colr = 'rgba(155, 28, 239, .5)';
+         else if (response == 500)
+          colr = 'rgba(239, 49, 28, .5)';
+         else
+          colr = 'rgba(255,0,255,0.3)';
+
+
+        chartDataSinglePoint.color = colr;
+
+
+        //console.log(chartDataSinglePoint);
+        chartData.push(chartDataSinglePoint);
+      });
+      	console.log(chartData);
+        ScatterplotData(chartData);
+	while (chartData.length) { chartData.pop(); }
+    };
+
+function ScatterplotData(data) {
+      $(function () {
+          $('#container').highcharts({
+            chart: {
+                type: 'scatter',
+                zoomType: 'xy'
+            },
+            title: {
+              text: 'Request timestamp vs time taken',
+            },
+            xAxis: {
+              type: 'datetime',
+              labels: {
+                  formatter: function() {
+                      //console.log(this);
+                      return moment(this.value).format("YYYY-MM-DD");
+                  }
+              },
+              title: {
+                    text: 'Request timestamp'
+                }
+            },
+            yAxis: {
+                title: {
+                    text: 'Load time (ms)'
+                }
+            },
+            tooltip: {
+              /*
+                formatter: function() {
+                    //console.log(this.x + " " + this.y);
+                    return  '<b>' + this.series.name +'</b><br/>' +
+                        Highcharts.dateFormat('%e - %b - %Y', new Date(this.x))
+                        //this.x
+                    + ' date, ' + this.y + ' (ms)';
+
+                    console.log(this);
+                    return Highcharts.dateFormat('%e - %b - %Y', new Date(this.x)) + '</br>' +
+                    this.point.other[0] + '</br>' +
+                    this.point.other[1] + '</br>' +
+                    this.point.other[2] + '</br>';
+                }
+                */
+                formatter: function() {
+                //console.log(this);
+                return  '<table><tr><th colspan="2"><h3><b>' + Highcharts.dateFormat('%e - %b - %Y', new Date(this.x)) +
+                '</b></h3></th></tr><br>' +
+                '<tr><th><b>Time taken:</b></th><td>' + this.point.y + '</td></tr><br>' +
+                '<tr><th><b>Method:</b></th><td>' + this.point.other[0] + '</td></tr><br>' +
+                '<tr><th><b>URL:</b></th><td>' + this.point.other[1] + '</td></tr><br>' +
+                '<tr><th><b>Response code:</b></th><td>' + this.point.other[2] + '</td></tr><br>' +
+                '<tr><th><b>Username:</b></th><td>' + this.point.other[3] +'</td></tr></table>'
+              }
+
+            },
+            plotOptions: {
+                scatter: {
+                    marker: {
+                        radius: 5,
+                        states: {
+                            hover: {
+                                enabled: true,
+                                lineColor: 'rgb(100,100,100)'
+                            }
+                        }
+                    },
+                    states: {
+                        hover: {
+                            marker: {
+                                enabled: false
+                            }
+                        }
+                    }
+                }
+            },
+            series: [{
+              name: 'IIS Page Load Performance',
+              data : data
+            }]
+          });
+        });
+    };
+  </script>
+</head>
+
+
+<body ng-app="login">
+	<div class="row">
+		<div class="col-md-16">
+			<div ui-view="header"></div>
+		</div>
+	</div><br>
+	<div class="row">
+    	<div ui-view="sidebar"></div>
+    </div>
+    <div class="row">
+    	<div class="col-md-16"><div ui-view="content"></div>
+	</div>
+</body>
+</html>
