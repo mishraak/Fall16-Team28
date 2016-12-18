@@ -4,6 +4,9 @@
 <img src="http://www.itzgeek.com/wp-content/uploads/2016/09/Run-ELK-stack-on-Docker-Container.png" width="50%" align="centre">
  
 
+
+Docker Hub link for automated builds : https://hub.docker.com/r/mishraakshay91/
+
 # Why we may not want to 'go cloud' with this app?
 As users of this app, we may not deploy this app to cloud for few reasons :
 
